@@ -2,46 +2,37 @@ const mongoose = require('mongoose');
 
 const recipeSchema = mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
     title: {
       type: String,
-      required: [true, 'Please add a recipe title'],
+      required: [true, 'Please add a title'],
     },
     ingredients: [
       {
-        name: {
-          type: String,
-          required: true,
-        },
-        amount: {
-          type: Number,
-        },
-        unit: {
-          type: String,
-        },
+        name: String,
+        amount: Number,
+        unit: String,
       },
     ],
-    instructions: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    instructions: [String],
+    prepTime: Number,
+    cookTime: Number,
+    servings: Number,
     nutritionalInfo: {
       calories: Number,
       protein: Number,
       carbs: Number,
       fat: Number,
-      vitamins: Object,
     },
-    dietaryCategories: [String],
-    prepTime: Number,
-    cookTime: Number,
-    servings: Number,
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+    tags: [String],
+    isSaved: {
+      type: Boolean,
+      default: false,
     },
-    imageUrl: String,
   },
   {
     timestamps: true,

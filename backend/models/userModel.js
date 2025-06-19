@@ -21,12 +21,6 @@ const userSchema = mongoose.Schema(
       cuisinePreferences: [String],
       calorieTarget: Number,
     },
-    savedRecipes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recipe',
-      },
-    ],
   },
   {
     timestamps: true,

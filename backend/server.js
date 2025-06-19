@@ -1,40 +1,48 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
+const colors = require('colors');
 const cors = require('cors');
-const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
-const recipeRoutes = require('./routes/recipeRoutes');
-const userRoutes = require('./routes/userRoutes');
-const ingredientRoutes = require('./routes/ingredientRoutes');
+const connectDB = require('./config/db');
 
-// Load environment variables
+// Load env vars
 dotenv.config();
 
 // Connect to database
-connectDB();
+// connectDB(); // Uncomment when database is set up
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Enable CORS
+app.use(cors());
+
 // Routes
-app.use('/api/recipes', recipeRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/ingredients', ingredientRoutes);
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/recipes', require('./routes/recipeRoutes'));
 
-// Basic route
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Welcome to AI Recipe Generator API' });
-});
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Error handling middleware
+  app.get('*', (req, res) =>
+    res.sendFile(
+      path.resolve(__dirname, '../', 'frontend', 'build', 'index.html')
+    )
+  );
+} else {
+  app.get('/', (req, res) => res.send('API is running...'));
+}
+
+// Error handler
 app.use(errorHandler);
 
-// Start server
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
 });
