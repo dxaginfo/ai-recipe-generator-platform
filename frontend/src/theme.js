@@ -3,16 +3,16 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4caf50', // Green color for food theme
+      main: '#4caf50', // Green
       light: '#80e27e',
       dark: '#087f23',
-      contrastText: '#ffffff',
+      contrastText: '#fff',
     },
     secondary: {
-      main: '#ff9800', // Orange for accent
+      main: '#ff9800', // Orange
       light: '#ffc947',
       dark: '#c66900',
-      contrastText: '#000000',
+      contrastText: '#000',
     },
     background: {
       default: '#f5f5f5',
@@ -20,30 +20,24 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 500,
-      fontSize: '2.5rem',
     },
     h2: {
       fontWeight: 500,
-      fontSize: '2rem',
     },
     h3: {
       fontWeight: 500,
-      fontSize: '1.75rem',
     },
     h4: {
-      fontWeight: 400,
-      fontSize: '1.5rem',
+      fontWeight: 500,
     },
     h5: {
-      fontWeight: 400,
-      fontSize: '1.25rem',
+      fontWeight: 500,
     },
     h6: {
-      fontWeight: 400,
-      fontSize: '1rem',
+      fontWeight: 500,
     },
   },
   shape: {
@@ -54,19 +48,23 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          padding: '8px 16px',
-        },
-        containedPrimary: {
-          '&:hover': {
-            backgroundColor: '#3b8c3f',
-          },
+          borderRadius: 8,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+          },
         },
       },
     },
