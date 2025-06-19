@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   AppBar,
   Box,
@@ -13,38 +14,31 @@ import {
   Tooltip,
   MenuItem,
   Link,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
-
-// Will use Redux for auth state management
-const user = null; // This will come from Redux state
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import { logout, reset } from '../../features/auth/authSlice';
 
 const pages = [
-  { name: 'Home', path: '/' },
-  { name: 'Recipe Generator', path: '/generator' },
-];
-
-const authPages = [
-  { name: 'Login', path: '/login' },
-  { name: 'Register', path: '/register' },
-];
-
-const userPages = [
-  { name: 'My Recipes', path: '/saved-recipes' },
-  { name: 'Profile', path: '/profile' },
-  { name: 'Logout', path: '/logout' },
+  { title: 'Recipe Generator', path: '/generator' },
+  { title: 'Saved Recipes', path: '/saved-recipes', protected: true },
 ];
 
 function Header() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
-
+  
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -57,21 +51,19 @@ function Header() {
     setAnchorElUser(null);
   };
 
-  const handleUserMenuClick = (path) => {
-    if (path === '/logout') {
-      // Handle logout logic here - will be implemented with Redux
-      console.log('Logout clicked');
-    } else {
-      navigate(path);
-    }
+  const onLogout = () => {
+    dispatch(logout());
+    dispatch(reset());
+    navigate('/');
     handleCloseUserMenu();
   };
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
+    <AppBar position="static" sx={{ mb: 2 }}>
+      <Container maxWidth="lg">
         <Toolbar disableGutters>
-          <RestaurantMenuIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          {/* Logo for desktop */}
+          <RestaurantIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
@@ -80,20 +72,19 @@ function Header() {
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
               fontWeight: 700,
-              letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            RECIPE AI
+            Recipe AI
           </Typography>
 
+          {/* Mobile menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="menu"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -119,21 +110,26 @@ function Header() {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page.name} onClick={handleCloseNavMenu}>
-                  <Link
+              {pages.map((page) => {
+                // Skip protected pages if user is not logged in
+                if (page.protected && !user) return null;
+                
+                return (
+                  <MenuItem 
+                    key={page.title} 
+                    onClick={handleCloseNavMenu}
                     component={RouterLink}
                     to={page.path}
-                    sx={{ textDecoration: 'none', color: 'inherit' }}
                   >
-                    <Typography textAlign="center">{page.name}</Typography>
-                  </Link>
-                </MenuItem>
-              ))}
+                    <Typography textAlign="center">{page.title}</Typography>
+                  </MenuItem>
+                );
+              })}
             </Menu>
           </Box>
 
-          <RestaurantMenuIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          {/* Logo for mobile */}
+          <RestaurantIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant="h5"
             noWrap
@@ -143,36 +139,47 @@ function Header() {
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontFamily: 'monospace',
               fontWeight: 700,
-              letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            RECIPE AI
+            Recipe AI
           </Typography>
 
+          {/* Desktop menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page.name}
-                component={RouterLink}
-                to={page.path}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page.name}
-              </Button>
-            ))}
+            {pages.map((page) => {
+              // Skip protected pages if user is not logged in
+              if (page.protected && !user) return null;
+              
+              return (
+                <Button
+                  key={page.title}
+                  component={RouterLink}
+                  to={page.path}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: 'white', display: 'block' }}
+                >
+                  {page.title}
+                </Button>
+              );
+            })}
           </Box>
 
+          {/* User menu */}
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
               <>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={user.name} src="/static/images/avatar/2.jpg" />
+                    <Avatar 
+                      alt={user.name} 
+                      src="/static/images/avatar/2.jpg" 
+                      sx={{ bgcolor: 'secondary.main' }}
+                    >
+                      {user.name.charAt(0)}
+                    </Avatar>
                   </IconButton>
                 </Tooltip>
                 <Menu
@@ -191,25 +198,38 @@ function Header() {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  {userPages.map((page) => (
-                    <MenuItem key={page.name} onClick={() => handleUserMenuClick(page.path)}>
-                      <Typography textAlign="center">{page.name}</Typography>
-                    </MenuItem>
-                  ))}
+                  <MenuItem 
+                    onClick={handleCloseUserMenu}
+                    component={RouterLink}
+                    to="/profile"
+                  >
+                    <Typography textAlign="center">Profile</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={onLogout}>
+                    <Typography textAlign="center">Logout</Typography>
+                  </MenuItem>
                 </Menu>
               </>
             ) : (
               <Box sx={{ display: 'flex' }}>
-                {authPages.map((page) => (
-                  <Button
-                    key={page.name}
-                    component={RouterLink}
-                    to={page.path}
-                    sx={{ color: 'white', mx: 1 }}
+                <Button 
+                  component={RouterLink} 
+                  to="/login" 
+                  color="inherit"
+                  sx={{ mr: 1 }}
+                >
+                  Login
+                </Button>
+                {!isMobile && (
+                  <Button 
+                    component={RouterLink} 
+                    to="/register" 
+                    variant="outlined" 
+                    color="inherit"
                   >
-                    {page.name}
+                    Sign Up
                   </Button>
-                ))}
+                )}
               </Box>
             )}
           </Box>
